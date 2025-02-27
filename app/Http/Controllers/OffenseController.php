@@ -24,6 +24,7 @@ class OffenseController extends Controller
             'id' => $offense->essay->id,
             'student_name' => $offense->student->firstname . ' ' . $offense->student->lastname,
             'word_count' => $offense->word_count,
+            'topic' => $offense->essay_topic,
             'offense_count' => $offense->offense_count,
             'status' => $offense->completed ? 'Complete' : 'Incomplete',
             'teacher_name' => $offense->teacher->firstname . ' ' . $offense->teacher->lastname,
@@ -49,7 +50,8 @@ class OffenseController extends Controller
     {
         $request->validate([
             'student_id' => 'required|exists:users,id',
-            'word_count' => 'required|integer'
+            'word_count' => 'required|integer',
+            'essay_topic' => 'required|string|max:255',
         ]);
 
         $teacherId = JWTAuth::user()->id;
@@ -58,6 +60,7 @@ class OffenseController extends Controller
         $offense->student_id = $request->student_id;
         $offense->teacher_id = $teacherId;
         $offense->word_count = $request->word_count;
+        $offense->essay_topic = $request->essay_topic;
         $offense->offense_count = Offense::where('student_id', $request->student_id)->count() + 1;
         $offense->completed = 0;
         $offense->due_date = Carbon::now()->addDays(7);
@@ -89,6 +92,7 @@ class OffenseController extends Controller
                 'student_name' => $essay->student->firstname . ' ' . $essay->student->lastname,
                 'teacher_name' => $essay->teacher->firstname . ' ' . $essay->teacher->lastname,
                 'word_count' => $essay->offense->word_count,
+                'topic' => $essay->offense->essay_topic,
                 'offense_count' => $essay->offense->offense_count,
                 'status' => $essay->offense->completed ? 'Complete' : 'Incomplete',
 
@@ -96,6 +100,27 @@ class OffenseController extends Controller
         });
         return response()->json($response);
     }
-
+    public function showAssignmentToUpdate($id)
+    {
+        $offense = Offense::findOrFail($id);
+        return response()->json($offense);
+    }
+    public function updateAssignment(Request $request, $id){
+        $request->validate([
+            'word_count' => 'required|integer|min:100',
+            'essay_topic' => 'required|string|max:255',
+            'due_date' => 'required|date',
+        ]);
+        $essay = Offense::findOrFail($id);
+        $essay->update([
+            'word_count'=>$request->word_count,
+            'essay_topic' =>$request->essay_topic,
+            'due_date' => $request->due_date,
+        ]);
+        return response([
+            'message' =>'Assignment updated successfully',
+            'essay' =>$essay,
+        ]);
+    }
     
 }

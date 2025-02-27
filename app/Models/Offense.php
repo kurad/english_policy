@@ -9,7 +9,7 @@ class Offense extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'student_id', 'teacher_id', 'word_count', 'offense_count', 'completed', 'due_date'
+        'student_id', 'teacher_id', 'word_count', 'essay_topic','offense_count', 'completed', 'due_date'
     ];
     public function essay()
     {

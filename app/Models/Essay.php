@@ -19,4 +19,8 @@ class Essay extends Model
     {
         return $this->hasMany(Review::class, 'essay_id');
     }
+    public function student()
+    {
+        return $this->hasOneThrough(User::class, Offense::class, 'id', 'id', 'offense_id', 'student_id');
+    }
 }

@@ -20,9 +20,12 @@ Route::post('/assign-essay', [OffenseController::class, 'assignEssay'])->middlew
 
 Route::post('/ofenses/{offense_id}/submit-essay',[EssayController::class,'submitEssay'])->middleware('auth.jwt');
 Route::post('/essays/{essay_id}/review', [EssayReviewController::class, 'reviewEssay'])->middleware('auth.jwt');
+Route::get('/essays/{id}', [EssayController::class, 'showEssayToModify']);
 Route::get('/students', [AuthController::class, 'fetchStudents']);
 Route::get('/teacher/get-offenses',[OffenseController::class, 'index'])->middleware('auth.jwt');
 Route::get('/teacher/get-all-offenses',[OffenseController::class, 'index1'])->middleware('auth.jwt');
+
+Route::put('/offense/{id}',[OffenseController::class, 'updateAssignment'])->middleware('auth.jwt');
 
 Route::get('/student/essays', [EssayController::class, 'getStudentEssay'])->middleware('auth.jwt');
 Route::get('/student/essays/{essayId}', [EssayController::class, 'getEssay'])->middleware('auth.jwt');
