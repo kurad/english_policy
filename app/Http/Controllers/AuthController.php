@@ -28,6 +28,28 @@ class AuthController extends Controller
             'message' => 'Registration successful. Please login.',
         ], 200);
     }
+    public function staffRegister(Request $request){
+        $request->validate([
+            'firstname' => 'required|string|max:255',
+            'lastname' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users,email',
+            'password' =>'required|string|min:8|confirmed',
+        ]);
+
+        $user = User::create([
+            'firstname' => $request->firstname,
+            'lastname' => $request->lastname,
+            'email' => $request->email,
+            'password' =>bcrypt($request->password),
+            'role' => 'teacher',
+            'complete_profile' =>true,
+        ]);
+        $token = JWTAuth::fromUser($user);
+
+        return response()->json([
+            'message' => 'Registration successful. Please login.',
+        ], 200);
+    }
 
     public function login(Request $request){
         $validator = Validator::make($request->all(),[
