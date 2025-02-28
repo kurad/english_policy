@@ -146,6 +146,11 @@ class AuthController extends Controller
         $students = User::where('role', 'student')->where('complete_profile', 1)->get();
         return response()->json($students);
     }
+    public function fetchStaff()
+    {
+        $staff = User::where('role', 'teacher')->get();
+        return response()->json($staff);
+    }
 
     public function refreshToken(Request $request)
     {
