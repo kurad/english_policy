@@ -85,7 +85,10 @@ class EssayController extends Controller
                 'message' => "The essay must be at least {$essay->offense->word_count } words. It is now {$wordCount}"
             ], 422);
         }
-        $essay->update(['content' =>$request->content]);
+        $essay->update([
+            'content' =>$request->content,
+            'status' =>'submitted',
+        ]);
         $essay->offense->update(['completed' => 1]);
 
         return response()->json([

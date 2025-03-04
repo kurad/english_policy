@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class Essay extends Model
 {
     use HasFactory;
-    protected $fillable = ['offense_id','content'];
+    protected $fillable = ['offense_id','content','status'];
 
     public function offense()
     {
