@@ -15,37 +15,61 @@ class OffenseController extends Controller
     {
         $teacherId = auth()->user()->id;
 
+$essays = Offense::where('teacher_id', $teacherId)
+    ->with(['student', 'essay', 'teacher'])
+    ->join('essays', 'offenses.id', '=', 'essays.offense_id') // Join with essays to order by status
+    ->where('essays.reviewed', 0)
+    ->orderBy('essays.status', 'desc') // Order by essay status (0 = Not Completed, 1 = Completed)
+    ->select('offenses.*') // Select only offenses columns to avoid conflicts
+    ->get();
+
+$response = $essays->map(function ($offense) {
+    return [
+        'id' => $offense->essay->id ?? null, // Handle possible null essay
+        'student_name' => optional($offense->student)->firstname . ' ' . optional($offense->student)->lastname,
+        'word_count' => $offense->word_count,
+        'essay_topic' => $offense->essay_topic,
+        'offense_count' => $offense->offense_count,
+        'status' => optional($offense->essay)->status ? 'Completed' : 'Not Yet Completed',
+        'teacher_name' => optional($offense->teacher)->firstname . ' ' . optional($offense->teacher)->lastname,
+        'due_date' => $offense->due_date,
+        'reviewed' => optional($offense->essay)->reviewed,
+    ];
+});
+
+
+    return response()->json($response);
+    }
+    public function getReviewedEssays()
+{
+    $teacherId = auth()->user()->id;
+
     $essays = Offense::where('teacher_id', $teacherId)
-        ->with('student', 'essay', 'teacher')
+        ->with(['student', 'essay', 'teacher'])
+        ->join('essays', 'offenses.id', '=', 'essays.offense_id')
+        ->where('essays.status', 1) // Ensure the essay is completed
+        ->where('essays.reviewed', 1) // Ensure it has been reviewed
+        ->orderBy('essays.updated_at', 'desc') // Order by last update time
+        ->select('offenses.*')
         ->get();
 
     $response = $essays->map(function ($offense) {
         return [
-            'id' => $offense->essay->id,
-            'student_name' => $offense->student->firstname . ' ' . $offense->student->lastname,
+            'id' => $offense->essay->id ?? null,
+            'student_name' => optional($offense->student)->firstname . ' ' . optional($offense->student)->lastname,
             'word_count' => $offense->word_count,
-            'topic' => $offense->essay_topic,
+            'essay_topic' => $offense->essay_topic,
             'offense_count' => $offense->offense_count,
-            'status' => $offense->completed ? 'Complete' : 'Incomplete',
-            'teacher_name' => $offense->teacher->firstname . ' ' . $offense->teacher->lastname,
-            'due_date' => $offense->due_date, // Assuming created_at as due date
-            'reviewed' => $offense->essay->reviewed, // Assuming created_at as due date
+            'status' => 'Reviewed',
+            'teacher_name' => optional($offense->teacher)->firstname . ' ' . optional($offense->teacher)->lastname,
+            'due_date' => $offense->due_date,
+            'reviewed' => 1,
         ];
     });
 
     return response()->json($response);
-    }
+}
 
-    public function index1()
-    {
-        $teacherId = auth()->user()->id;
-
-    $essays = Offense::where('teacher_id', $teacherId)
-        ->with('student', 'essay', 'teacher')
-        ->get();
-
-    return response()->json($essays);
-    }
     public function assignEssay(Request $request)
     {
         $request->validate([
@@ -62,7 +86,6 @@ class OffenseController extends Controller
         $offense->word_count = $request->word_count;
         $offense->essay_topic = $request->essay_topic;
         $offense->offense_count = Offense::where('student_id', $request->student_id)->count() + 1;
-        $offense->completed = 0;
         $offense->due_date = Carbon::now()->addDays(7);
         $offense->save();
 
@@ -94,7 +117,7 @@ class OffenseController extends Controller
                 'word_count' => $essay->offense->word_count,
                 'topic' => $essay->offense->essay_topic,
                 'offense_count' => $essay->offense->offense_count,
-                'status' => $essay->offense->completed ? 'Complete' : 'Incomplete',
+                'status' => $essay->offense->status ? 'Complete' : 'Incomplete',
 
             ];
         });

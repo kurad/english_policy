@@ -25,6 +25,7 @@ Route::get('/essays/{id}', [EssayController::class, 'showEssayToModify']);
 Route::get('/students', [AuthController::class, 'fetchStudents']);
 Route::get('/staff', [AuthController::class, 'fetchStaff']);
 Route::get('/teacher/get-offenses',[OffenseController::class, 'index'])->middleware('auth.jwt');
+Route::get('/teacher/get-reviewed',[OffenseController::class, 'getReviewedEssays'])->middleware('auth.jwt');
 Route::get('/teacher/get-all-offenses',[OffenseController::class, 'index1'])->middleware('auth.jwt');
 
 Route::put('/offense/{id}',[OffenseController::class, 'updateAssignment'])->middleware('auth.jwt');

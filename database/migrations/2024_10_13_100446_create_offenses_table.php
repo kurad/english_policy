@@ -19,7 +19,6 @@ return new class extends Migration
             $table->foreign('teacher_id')->references('id')->on('users');
             $table->integer('word_count');
             $table->integer('offense_count');
-            $table->boolean('completed')->default(false);
             $table->timestamps();
         });
     }

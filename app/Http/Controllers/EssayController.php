@@ -87,10 +87,8 @@ class EssayController extends Controller
         }
         $essay->update([
             'content' =>$request->content,
-            'status' =>'submitted',
+            'status' =>true,
         ]);
-        $essay->offense->update(['completed' => 1]);
-
         return response()->json([
             'message' => 'Essay submitted successfully'
         ]);
