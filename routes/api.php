@@ -40,3 +40,5 @@ Route::post('/essays/{id}/review', [EssayController::class, 'markAsReviewed']);
 
 Route::get('/essay/get-reviews/{id}', [EssayReviewController::class, 'getEssaysWithReviews']);
 Route::delete('/reviews/{id}', [EssayReviewController::class, 'deleteReview']);
+
+Route::delete('/essays/{id}', [OffenseController::class, 'deleteAssignedEssay'])->middleware('auth.jwt');

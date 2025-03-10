@@ -99,7 +99,6 @@ $response = $essays->map(function ($offense) {
     }
     public function getAssignedEssay(){
         $user = auth()->user();
-
         if($user->role != 'teacher'){
            $essay = Offense::with('student', 'teacher')
             ->where('teacher_id', $user->id)
@@ -145,5 +144,32 @@ $response = $essays->map(function ($offense) {
             'essay' =>$essay,
         ]);
     }
+    public function deleteAssignedEssay($id)
+{
+    $teacherId = JWTAuth::user()->id;
+    $offense = Offense::findOrFail($id);
+
+    if (!$offense) {
+        return response()->json(['message' => 'Offense not found'], 404);
+    }
+    if ($offense->teacher_id !== $teacherId) {
+        return response()->json(['message' => 'Unauthorized'], 403);
+    }
+    $studentId = $offense->student_id;
+    Essay::where('offense_id', $offense->id)->delete();
+
+    $offense->delete();
+    $newOffenseCount = Offense::where('student_id', $studentId)->count();
+    $offenses = Offense::where('student_id', $studentId)->orderBy('created_at')->get();
+    foreach ($offenses as $index => $off) {
+        $off->offense_count = $index + 1;
+        $off->save();
+    }
+
+    return response()->json([
+        'message' => 'Assigned essay deleted successfully',
+        'new_offense_count' => $newOffenseCount
+    ], 200);
+}
     
 }
